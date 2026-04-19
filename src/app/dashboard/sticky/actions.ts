@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireDashboardAdmin } from "@/lib/guards";
 import { revalidatePath } from "next/cache";
+import { callBridge } from "@/lib/bridge";
 
 export async function upsertStickyAction(formData: FormData) {
   await requireDashboardAdmin();
@@ -39,6 +40,38 @@ export async function upsertStickyAction(formData: FormData) {
       action: "DASHBOARD_STICKY_UPSERTED",
       metadata: { guildId, channelId },
     },
+  });
+
+  revalidatePath("/dashboard/sticky");
+}
+
+export async function upsertStickyViaBridgeAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+
+  const guildId = String(formData.get("guildId") || "").trim();
+  const channelId = String(formData.get("channelId") || "").trim();
+  const content = String(formData.get("content") || "").trim();
+
+  await callBridge("/api/sticky/upsert", {
+    guildId,
+    channelId,
+    content,
+    actorId: session.user.discordId,
+  });
+
+  revalidatePath("/dashboard/sticky");
+}
+
+export async function deleteStickyViaBridgeAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+
+  const guildId = String(formData.get("guildId") || "").trim();
+  const channelId = String(formData.get("channelId") || "").trim();
+
+  await callBridge("/api/sticky/delete", {
+    guildId,
+    channelId,
+    actorId: session.user.discordId,
   });
 
   revalidatePath("/dashboard/sticky");

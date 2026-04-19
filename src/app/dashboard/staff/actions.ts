@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireDashboardAdmin } from "@/lib/guards";
 import { revalidatePath } from "next/cache";
+import { callBridge } from "@/lib/bridge";
 
 async function findStaffUserByDiscordId(discordId: string) {
   return prisma.user.findUnique({
@@ -46,6 +47,50 @@ export async function addOrUpdateStaffAction(formData: FormData) {
       userId: discordId,
       metadata: { discordId, rank },
     },
+  });
+
+  revalidatePath("/dashboard/staff");
+}
+
+export async function upsertStaffViaBridgeAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+  const discordId = String(formData.get("discordId") || "").trim();
+  const rank = String(formData.get("rank") || "").trim();
+
+  await callBridge("/api/staff/upsert", {
+    discordId,
+    rank,
+    actorId: session.user.discordId,
+  });
+
+  revalidatePath("/dashboard/staff");
+}
+
+export async function addStrikeViaBridgeAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+  const discordId = String(formData.get("discordId") || "").trim();
+  const amount = Number(String(formData.get("amount") || "1"));
+
+  await callBridge("/api/staff/strikes", {
+    discordId,
+    amount,
+    mode: "add",
+    actorId: session.user.discordId,
+  });
+
+  revalidatePath("/dashboard/staff");
+}
+
+export async function removeStrikeViaBridgeAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+  const discordId = String(formData.get("discordId") || "").trim();
+  const amount = Number(String(formData.get("amount") || "1"));
+
+  await callBridge("/api/staff/strikes", {
+    discordId,
+    amount,
+    mode: "remove",
+    actorId: session.user.discordId,
   });
 
   revalidatePath("/dashboard/staff");
