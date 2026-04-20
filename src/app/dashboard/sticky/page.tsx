@@ -36,7 +36,8 @@ export default async function StickyPage() {
                 <td>{new Date(row.updatedAt).toLocaleString()}</td>
                 <td>
                   <form action={deleteStickyAction}>
-                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="guildId" value={row.guildId} />
+                    <input type="hidden" name="channelId" value={row.channelId} />
                     <button style={dangerButtonStyle}>Delete</button>
                   </form>
                 </td>
