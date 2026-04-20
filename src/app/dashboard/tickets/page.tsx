@@ -1,8 +1,7 @@
 import { Panel } from "@/components/ui/card";
-import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
-import { getOpenTicketsByGuild } from "@/lib/data";
+import { TicketOpsPanel } from "@/components/tickets/ticket-ops-panel";
 import { getSelectedGuildId } from "@/lib/guild-filter";
-import { claimTicketAction, closeTicketAction } from "./actions";
+import { prisma } from "@/lib/prisma";
 
 export default async function TicketsPage({
   searchParams,
@@ -10,11 +9,42 @@ export default async function TicketsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const resolvedSearchParams = (await searchParams) || {};
+  const raw = resolvedSearchParams.q;
+  const query = Array.isArray(raw) ? (raw[0] || "") : (raw || "");
   const guildId = getSelectedGuildId(resolvedSearchParams);
-  const tickets = await getOpenTicketsByGuild(guildId || undefined);
+
+  const tickets = await prisma.ticket.findMany({
+    where: {
+      ...(guildId ? { guildId } : {}),
+      ...(query
+        ? {
+            OR: [
+              { channelId: { contains: query } },
+              { creatorId: { contains: query } },
+              { claimedById: { contains: query } },
+              { subject: { contains: query } },
+              { status: { contains: query } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
 
   return (
-    <Panel title={guildId ? "Open Tickets (Guild Scope)" : "Open Tickets"}>
+    <Panel title={guildId ? "Ticket Operations (Guild Scope)" : "Ticket Operations"}>
+      <form method="get" style={{ marginBottom: 16, display: "flex", gap: 8 }}>
+        {guildId ? <input type="hidden" name="guild" value={guildId} /> : null}
+        <input
+          name="q"
+          defaultValue={query}
+          placeholder="Search by creator, channel, claimedBy, subject, or status"
+          style={inputStyle}
+        />
+        <button style={buttonStyle}>Search</button>
+      </form>
+
       <table>
         <thead>
           <tr>
@@ -23,6 +53,7 @@ export default async function TicketsPage({
             <th>Creator</th>
             <th>Status</th>
             <th>Claimed By</th>
+            <th>Subject</th>
             <th>Created</th>
             <th>Actions</th>
           </tr>
@@ -35,21 +66,10 @@ export default async function TicketsPage({
               <td>{ticket.creatorId}</td>
               <td>{ticket.status}</td>
               <td>{ticket.claimedById || "Unclaimed"}</td>
+              <td>{ticket.subject || "—"}</td>
               <td>{new Date(ticket.createdAt).toLocaleString()}</td>
               <td>
-                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", flexWrap: "wrap" }}>
-                  <ActionForm action={claimTicketAction} idleText="Claim" pendingText="Claiming...">
-                    <input type="hidden" name="id" value={ticket.id} />
-                  </ActionForm>
-                  <DangerActionForm
-                    action={closeTicketAction}
-                    idleText="Close"
-                    pendingText="Closing..."
-                    confirmMessage="Close this ticket?"
-                  >
-                    <input type="hidden" name="id" value={ticket.id} />
-                  </DangerActionForm>
-                </div>
+                <TicketOpsPanel ticketId={ticket.id} status={ticket.status} />
               </td>
             </tr>
           ))}
@@ -58,3 +78,20 @@ export default async function TicketsPage({
     </Panel>
   );
 }
+
+const inputStyle = {
+  flex: 1,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.04)",
+  color: "white",
+  padding: "0.9rem 1rem",
+};
+
+const buttonStyle = {
+  borderRadius: 12,
+  background: "#2563eb",
+  color: "white",
+  padding: "0.9rem 1rem",
+  fontWeight: 700,
+};
