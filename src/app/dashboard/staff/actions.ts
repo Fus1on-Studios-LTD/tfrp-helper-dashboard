@@ -63,6 +63,19 @@ export async function removeStrikeAction(formData: FormData) {
   revalidatePath("/dashboard/staff");
 }
 
-export async function removeStaffAction(_formData: FormData) {
-  throw new Error("Staff removal is not implemented in the internal API yet.");
+export async function removeStaffAction(formData: FormData) {
+  const session = await requireDashboardAdmin();
+
+  const discordId = String(formData.get("discordId") || "").trim();
+
+  if (!discordId) {
+    throw new Error("Discord ID is required.");
+  }
+
+  await callInternalApi("/api/staff/remove", {
+    discordId,
+    actorId: session.user.discordId,
+  });
+
+  revalidatePath("/dashboard/staff");
 }

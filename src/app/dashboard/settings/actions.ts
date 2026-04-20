@@ -1,11 +1,11 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { requireDashboardAdmin } from "@/lib/guards";
 import { revalidatePath } from "next/cache";
+import { callInternalApi } from "@/lib/bridge";
 
 export async function updateGuildConfigAction(formData: FormData) {
-  await requireDashboardAdmin();
+  const session = await requireDashboardAdmin();
 
   const guildId = String(formData.get("guildId") || "").trim();
   const modLogChannelId = String(formData.get("modLogChannelId") || "").trim() || null;
@@ -22,35 +22,13 @@ export async function updateGuildConfigAction(formData: FormData) {
     throw new Error("Sticky cooldown must be a valid non-negative number.");
   }
 
-  await prisma.guildConfig.upsert({
-    where: { guildId },
-    update: {
-      modLogChannelId,
-      ticketCategoryId,
-      ticketLogChannelId,
-      stickyCooldownMs,
-    },
-    create: {
-      guildId,
-      modLogChannelId,
-      ticketCategoryId,
-      ticketLogChannelId,
-      stickyCooldownMs,
-    },
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      guildId,
-      action: "DASHBOARD_GUILD_CONFIG_UPDATED",
-      userId: null,
-      metadata: {
-        modLogChannelId,
-        ticketCategoryId,
-        ticketLogChannelId,
-        stickyCooldownMs,
-      },
-    },
+  await callInternalApi("/api/settings/guild-config", {
+    guildId,
+    modLogChannelId,
+    ticketCategoryId,
+    ticketLogChannelId,
+    stickyCooldownMs,
+    actorId: session.user.discordId,
   });
 
   revalidatePath("/dashboard/settings");
