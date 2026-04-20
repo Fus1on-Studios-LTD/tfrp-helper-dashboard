@@ -1,11 +1,18 @@
 import { Panel } from "@/components/ui/card";
-import { getModerationRows } from "@/lib/data";
+import { getModerationRowsByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 
-export default async function ModerationPage() {
-  const rows = await getModerationRows();
+export default async function ModerationPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const rows = await getModerationRowsByGuild(guildId || undefined);
 
   return (
-    <Panel title="Moderation Log">
+    <Panel title={guildId ? "Moderation Log (Guild Scope)" : "Moderation Log"}>
       <table>
         <thead>
           <tr>

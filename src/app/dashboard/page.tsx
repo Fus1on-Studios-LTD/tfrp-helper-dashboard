@@ -1,19 +1,26 @@
-import { getDashboardOverview } from "@/lib/data";
 import { Card, Panel } from "@/components/ui/card";
+import { getDashboardOverviewByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 
-export default async function DashboardPage() {
-  const data = await getDashboardOverview();
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const data = await getDashboardOverviewByGuild(guildId || undefined);
 
   return (
     <div className="page-stack">
       <div className="cards">
-        <Card title="Staff Members" value={data.staffCount} subtitle="Tracked inside the staff system" />
-        <Card title="Open Tickets" value={data.openTickets} subtitle="Currently unresolved" />
-        <Card title="Moderation Today" value={data.todayModeration} subtitle="Warnings, bans, timeouts, and more" />
-        <Card title="Sticky Messages" value={data.stickyCount} subtitle="Configured across channels" />
+        <Card title="Staff Members" value={data.staffCount} subtitle={guildId ? "Filtered view" : "Tracked inside the staff system"} />
+        <Card title="Open Tickets" value={data.openTickets} subtitle={guildId ? "For selected guild" : "Currently unresolved"} />
+        <Card title="Moderation Today" value={data.todayModeration} subtitle={guildId ? "For selected guild" : "Warnings, bans, timeouts, and more"} />
+        <Card title="Sticky Messages" value={data.stickyCount} subtitle={guildId ? "For selected guild" : "Configured across channels"} />
       </div>
 
-      <Panel title="Recent Audit Activity">
+      <Panel title={guildId ? `Recent Audit Activity (Guild Scope)` : "Recent Audit Activity"}>
         <table>
           <thead>
             <tr>

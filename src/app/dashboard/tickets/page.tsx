@@ -1,16 +1,24 @@
 import { Panel } from "@/components/ui/card";
 import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
-import { getOpenTickets } from "@/lib/data";
+import { getOpenTicketsByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 import { claimTicketAction, closeTicketAction } from "./actions";
 
-export default async function TicketsPage() {
-  const tickets = await getOpenTickets();
+export default async function TicketsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const tickets = await getOpenTicketsByGuild(guildId || undefined);
 
   return (
-    <Panel title="Open Tickets">
+    <Panel title={guildId ? "Open Tickets (Guild Scope)" : "Open Tickets"}>
       <table>
         <thead>
           <tr>
+            <th>Guild</th>
             <th>Channel</th>
             <th>Creator</th>
             <th>Status</th>
@@ -22,6 +30,7 @@ export default async function TicketsPage() {
         <tbody>
           {tickets.map((ticket) => (
             <tr key={ticket.id}>
+              <td>{ticket.guildId}</td>
               <td>{ticket.channelId}</td>
               <td>{ticket.creatorId}</td>
               <td>{ticket.status}</td>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withGuildQuery } from "@/lib/guild-filter";
 
 const items = [
   { href: "/dashboard", label: "Overview" },
@@ -9,7 +10,7 @@ const items = [
   { href: "/dashboard/settings", label: "Settings" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ selectedGuildId = "" }: { selectedGuildId?: string }) {
   return (
     <aside className="w-full rounded-2xl border border-white/10 bg-black/30 p-4 lg:w-72">
       <div className="mb-6">
@@ -21,7 +22,7 @@ export function Sidebar() {
         {items.map((item) => (
           <Link
             key={item.href}
-            href={item.href}
+            href={withGuildQuery(item.href, selectedGuildId)}
             className="block rounded-xl border border-transparent px-3 py-2 text-sm text-white/75 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
           >
             {item.label}

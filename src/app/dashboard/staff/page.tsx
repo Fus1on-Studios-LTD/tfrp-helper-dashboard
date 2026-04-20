@@ -1,6 +1,7 @@
 import { Panel } from "@/components/ui/card";
 import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
-import { getStaffRows } from "@/lib/data";
+import { getStaffRowsByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 import {
   addOrUpdateStaffAction,
   addStrikeAction,
@@ -8,12 +9,18 @@ import {
   removeStaffAction,
 } from "./actions";
 
-export default async function StaffPage() {
-  const rows = await getStaffRows();
+export default async function StaffPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const rows = await getStaffRowsByGuild(guildId || undefined);
 
   return (
     <div className="page-stack">
-      <Panel title="Add or Update Staff Member">
+      <Panel title={guildId ? "Add or Update Staff Member (Global record)" : "Add or Update Staff Member"}>
         <ActionForm
           action={addOrUpdateStaffAction}
           idleText="Save Staff Member"
@@ -25,7 +32,7 @@ export default async function StaffPage() {
         </ActionForm>
       </Panel>
 
-      <Panel title="Staff Roster">
+      <Panel title={guildId ? "Staff Roster (Guild Scope)" : "Staff Roster"}>
         <table>
           <thead>
             <tr>

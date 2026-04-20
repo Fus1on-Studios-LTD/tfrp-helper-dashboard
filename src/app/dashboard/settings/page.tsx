@@ -1,21 +1,28 @@
 import { Panel } from "@/components/ui/card";
 import { ActionForm } from "@/components/ui/action-form";
-import { getGuildConfigs } from "@/lib/data";
+import { getGuildConfigsByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 import { updateGuildConfigAction } from "./actions";
 
-export default async function SettingsPage() {
-  const rows = await getGuildConfigs();
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const rows = await getGuildConfigsByGuild(guildId || undefined);
 
   return (
     <div className="page-stack">
-      <Panel title="Update Guild Config">
+      <Panel title={guildId ? "Update Guild Config (Selected Guild)" : "Update Guild Config"}>
         <ActionForm
           action={updateGuildConfigAction}
           idleText="Save Guild Config"
           pendingText="Saving..."
           className="grid"
         >
-          <input name="guildId" placeholder="Guild ID" style={inputStyle} required />
+          <input name="guildId" placeholder="Guild ID" style={inputStyle} required defaultValue={guildId} />
           <input name="modLogChannelId" placeholder="Mod Log Channel ID" style={inputStyle} />
           <input name="ticketCategoryId" placeholder="Ticket Category ID" style={inputStyle} />
           <input name="ticketLogChannelId" placeholder="Ticket Log Channel ID" style={inputStyle} />
@@ -23,7 +30,7 @@ export default async function SettingsPage() {
         </ActionForm>
       </Panel>
 
-      <Panel title="Current Guild Settings">
+      <Panel title={guildId ? "Current Guild Settings (Guild Scope)" : "Current Guild Settings"}>
         <table>
           <thead>
             <tr>

@@ -1,27 +1,34 @@
 import { Panel } from "@/components/ui/card";
 import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
-import { getStickyRows } from "@/lib/data";
+import { getStickyRowsByGuild } from "@/lib/data";
+import { getSelectedGuildId } from "@/lib/guild-filter";
 import { upsertStickyAction, deleteStickyAction } from "./actions";
 
-export default async function StickyPage() {
-  const rows = await getStickyRows();
+export default async function StickyPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const guildId = getSelectedGuildId(resolvedSearchParams);
+  const rows = await getStickyRowsByGuild(guildId || undefined);
 
   return (
     <div className="page-stack">
-      <Panel title="Create or Update Sticky Message">
+      <Panel title={guildId ? "Create or Update Sticky Message (Selected Guild)" : "Create or Update Sticky Message"}>
         <ActionForm
           action={upsertStickyAction}
           idleText="Save Sticky Message"
           pendingText="Saving..."
           className="grid"
         >
-          <input name="guildId" placeholder="Guild ID" style={inputStyle} required />
+          <input name="guildId" placeholder="Guild ID" style={inputStyle} required defaultValue={guildId} />
           <input name="channelId" placeholder="Channel ID" style={inputStyle} required />
           <textarea name="content" placeholder="Sticky content" style={{ ...inputStyle, minHeight: 140 }} required />
         </ActionForm>
       </Panel>
 
-      <Panel title="Existing Sticky Messages">
+      <Panel title={guildId ? "Existing Sticky Messages (Guild Scope)" : "Existing Sticky Messages"}>
         <table>
           <thead>
             <tr>
