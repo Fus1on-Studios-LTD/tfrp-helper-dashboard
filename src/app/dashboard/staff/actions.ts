@@ -15,6 +15,7 @@ export async function addOrUpdateStaffAction(_prevState: ActionState, formData: 
 
     const discordId = String(formData.get("discordId") || "").trim();
     const rank = String(formData.get("rank") || "").trim();
+    const note = String(formData.get("note") || "").trim() || null;
 
     if (!discordId || !rank) {
       throw new Error("Discord ID and rank are required.");
@@ -23,6 +24,7 @@ export async function addOrUpdateStaffAction(_prevState: ActionState, formData: 
     await callInternalApi("/api/staff/upsert", {
       discordId,
       rank,
+      note,
       actorId: session.user.discordId,
     });
 
@@ -39,6 +41,7 @@ export async function addStrikeAction(_prevState: ActionState, formData: FormDat
 
     const discordId = String(formData.get("discordId") || "").trim();
     const amount = Number(String(formData.get("amount") || "1"));
+    const reason = String(formData.get("reason") || "").trim() || null;
 
     if (!discordId || Number.isNaN(amount) || amount < 1) {
       throw new Error("Valid Discord ID and strike amount are required.");
@@ -48,6 +51,7 @@ export async function addStrikeAction(_prevState: ActionState, formData: FormDat
       discordId,
       amount,
       mode: "add",
+      reason,
       actorId: session.user.discordId,
     });
 
@@ -64,6 +68,7 @@ export async function removeStrikeAction(_prevState: ActionState, formData: Form
 
     const discordId = String(formData.get("discordId") || "").trim();
     const amount = Number(String(formData.get("amount") || "1"));
+    const reason = String(formData.get("reason") || "").trim() || null;
 
     if (!discordId || Number.isNaN(amount) || amount < 1) {
       throw new Error("Valid Discord ID and strike amount are required.");
@@ -73,6 +78,7 @@ export async function removeStrikeAction(_prevState: ActionState, formData: Form
       discordId,
       amount,
       mode: "remove",
+      reason,
       actorId: session.user.discordId,
     });
 
@@ -88,6 +94,7 @@ export async function removeStaffAction(_prevState: ActionState, formData: FormD
     const session = await requireDashboardAdmin();
 
     const discordId = String(formData.get("discordId") || "").trim();
+    const reason = String(formData.get("reason") || "").trim() || null;
 
     if (!discordId) {
       throw new Error("Discord ID is required.");
@@ -95,6 +102,7 @@ export async function removeStaffAction(_prevState: ActionState, formData: FormD
 
     await callInternalApi("/api/staff/remove", {
       discordId,
+      reason,
       actorId: session.user.discordId,
     });
 
@@ -103,4 +111,18 @@ export async function removeStaffAction(_prevState: ActionState, formData: FormD
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "Failed to remove staff member." };
   }
+}
+
+export async function getStaffProfileAction(discordId: string, guildId?: string) {
+  const session = await requireDashboardAdmin();
+  void session;
+
+  if (!discordId) {
+    throw new Error("Discord ID is required.");
+  }
+
+  return callInternalApi("/api/staff/profile", {
+    discordId,
+    guildId: guildId || null,
+  });
 }
