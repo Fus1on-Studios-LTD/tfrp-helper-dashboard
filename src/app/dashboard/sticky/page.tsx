@@ -1,4 +1,5 @@
 import { Panel } from "@/components/ui/card";
+import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
 import { getStickyRows } from "@/lib/data";
 import { upsertStickyAction, deleteStickyAction } from "./actions";
 
@@ -8,12 +9,16 @@ export default async function StickyPage() {
   return (
     <div className="page-stack">
       <Panel title="Create or Update Sticky Message">
-        <form action={upsertStickyAction} style={{ display: "grid", gap: 12 }}>
+        <ActionForm
+          action={upsertStickyAction}
+          idleText="Save Sticky Message"
+          pendingText="Saving..."
+          className="grid"
+        >
           <input name="guildId" placeholder="Guild ID" style={inputStyle} required />
           <input name="channelId" placeholder="Channel ID" style={inputStyle} required />
           <textarea name="content" placeholder="Sticky content" style={{ ...inputStyle, minHeight: 140 }} required />
-          <button style={buttonStyle}>Save Sticky Message</button>
-        </form>
+        </ActionForm>
       </Panel>
 
       <Panel title="Existing Sticky Messages">
@@ -35,11 +40,15 @@ export default async function StickyPage() {
                 <td>{row.content.slice(0, 80)}{row.content.length > 80 ? "..." : ""}</td>
                 <td>{new Date(row.updatedAt).toLocaleString()}</td>
                 <td>
-                  <form action={deleteStickyAction}>
+                  <DangerActionForm
+                    action={deleteStickyAction}
+                    idleText="Delete"
+                    pendingText="Deleting..."
+                    confirmMessage="Delete this sticky message?"
+                  >
                     <input type="hidden" name="guildId" value={row.guildId} />
                     <input type="hidden" name="channelId" value={row.channelId} />
-                    <button style={dangerButtonStyle}>Delete</button>
-                  </form>
+                  </DangerActionForm>
                 </td>
               </tr>
             ))}
@@ -56,20 +65,4 @@ const inputStyle = {
   background: "rgba(255,255,255,0.04)",
   color: "white",
   padding: "0.9rem 1rem",
-};
-
-const buttonStyle = {
-  borderRadius: 12,
-  background: "#f97316",
-  color: "white",
-  padding: "0.9rem 1rem",
-  fontWeight: 700,
-};
-
-const dangerButtonStyle = {
-  borderRadius: 10,
-  background: "#dc2626",
-  color: "white",
-  padding: "0.55rem 0.9rem",
-  fontWeight: 700,
 };

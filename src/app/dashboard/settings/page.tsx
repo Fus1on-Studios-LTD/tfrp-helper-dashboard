@@ -1,4 +1,5 @@
 import { Panel } from "@/components/ui/card";
+import { ActionForm } from "@/components/ui/action-form";
 import { getGuildConfigs } from "@/lib/data";
 import { updateGuildConfigAction } from "./actions";
 
@@ -8,14 +9,18 @@ export default async function SettingsPage() {
   return (
     <div className="page-stack">
       <Panel title="Update Guild Config">
-        <form action={updateGuildConfigAction} style={{ display: "grid", gap: 12 }}>
+        <ActionForm
+          action={updateGuildConfigAction}
+          idleText="Save Guild Config"
+          pendingText="Saving..."
+          className="grid"
+        >
           <input name="guildId" placeholder="Guild ID" style={inputStyle} required />
           <input name="modLogChannelId" placeholder="Mod Log Channel ID" style={inputStyle} />
           <input name="ticketCategoryId" placeholder="Ticket Category ID" style={inputStyle} />
           <input name="ticketLogChannelId" placeholder="Ticket Log Channel ID" style={inputStyle} />
           <input name="stickyCooldownMs" placeholder="Sticky Cooldown (ms)" style={inputStyle} defaultValue="15000" />
-          <button style={buttonStyle}>Save Guild Config</button>
-        </form>
+        </ActionForm>
       </Panel>
 
       <Panel title="Current Guild Settings">
@@ -52,12 +57,4 @@ const inputStyle = {
   background: "rgba(255,255,255,0.04)",
   color: "white",
   padding: "0.9rem 1rem",
-};
-
-const buttonStyle = {
-  borderRadius: 12,
-  background: "#f97316",
-  color: "white",
-  padding: "0.9rem 1rem",
-  fontWeight: 700,
 };

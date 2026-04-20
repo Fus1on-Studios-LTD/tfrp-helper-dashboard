@@ -4,34 +4,49 @@ import { requireDashboardAdmin } from "@/lib/guards";
 import { revalidatePath } from "next/cache";
 import { callInternalApi } from "@/lib/bridge";
 
-export async function claimTicketAction(formData: FormData) {
-  const session = await requireDashboardAdmin();
-  const ticketId = String(formData.get("id") || "").trim();
+type ActionState = {
+  ok: boolean;
+  message: string;
+};
 
-  if (!ticketId) {
-    throw new Error("Ticket ID is required.");
+export async function claimTicketAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const session = await requireDashboardAdmin();
+    const ticketId = String(formData.get("id") || "").trim();
+
+    if (!ticketId) {
+      throw new Error("Ticket ID is required.");
+    }
+
+    await callInternalApi("/api/tickets/claim", {
+      ticketId,
+      claimedById: session.user.discordId,
+    });
+
+    revalidatePath("/dashboard/tickets");
+    return { ok: true, message: "Ticket claimed successfully." };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "Failed to claim ticket." };
   }
-
-  await callInternalApi("/api/tickets/claim", {
-    ticketId,
-    claimedById: session.user.discordId,
-  });
-
-  revalidatePath("/dashboard/tickets");
 }
 
-export async function closeTicketAction(formData: FormData) {
-  const session = await requireDashboardAdmin();
-  const ticketId = String(formData.get("id") || "").trim();
+export async function closeTicketAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const session = await requireDashboardAdmin();
+    const ticketId = String(formData.get("id") || "").trim();
 
-  if (!ticketId) {
-    throw new Error("Ticket ID is required.");
+    if (!ticketId) {
+      throw new Error("Ticket ID is required.");
+    }
+
+    await callInternalApi("/api/tickets/close", {
+      ticketId,
+      closedById: session.user.discordId,
+    });
+
+    revalidatePath("/dashboard/tickets");
+    return { ok: true, message: "Ticket closed successfully." };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "Failed to close ticket." };
   }
-
-  await callInternalApi("/api/tickets/close", {
-    ticketId,
-    closedById: session.user.discordId,
-  });
-
-  revalidatePath("/dashboard/tickets");
 }

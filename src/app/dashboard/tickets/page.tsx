@@ -1,4 +1,5 @@
 import { Panel } from "@/components/ui/card";
+import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
 import { getOpenTickets } from "@/lib/data";
 import { claimTicketAction, closeTicketAction } from "./actions";
 
@@ -26,15 +27,20 @@ export default async function TicketsPage() {
               <td>{ticket.status}</td>
               <td>{ticket.claimedById || "Unclaimed"}</td>
               <td>{new Date(ticket.createdAt).toLocaleString()}</td>
-              <td style={{ display: "flex", gap: 8 }}>
-                <form action={claimTicketAction}>
-                  <input type="hidden" name="id" value={ticket.id} />
-                  <button style={buttonStyle}>Claim</button>
-                </form>
-                <form action={closeTicketAction}>
-                  <input type="hidden" name="id" value={ticket.id} />
-                  <button style={dangerButtonStyle}>Close</button>
-                </form>
+              <td>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <ActionForm action={claimTicketAction} idleText="Claim" pendingText="Claiming...">
+                    <input type="hidden" name="id" value={ticket.id} />
+                  </ActionForm>
+                  <DangerActionForm
+                    action={closeTicketAction}
+                    idleText="Close"
+                    pendingText="Closing..."
+                    confirmMessage="Close this ticket?"
+                  >
+                    <input type="hidden" name="id" value={ticket.id} />
+                  </DangerActionForm>
+                </div>
               </td>
             </tr>
           ))}
@@ -43,19 +49,3 @@ export default async function TicketsPage() {
     </Panel>
   );
 }
-
-const buttonStyle = {
-  borderRadius: 10,
-  background: "#2563eb",
-  color: "white",
-  padding: "0.55rem 0.9rem",
-  fontWeight: 700,
-};
-
-const dangerButtonStyle = {
-  borderRadius: 10,
-  background: "#dc2626",
-  color: "white",
-  padding: "0.55rem 0.9rem",
-  fontWeight: 700,
-};

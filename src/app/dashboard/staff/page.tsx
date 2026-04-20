@@ -1,4 +1,5 @@
 import { Panel } from "@/components/ui/card";
+import { ActionForm, DangerActionForm } from "@/components/ui/action-form";
 import { getStaffRows } from "@/lib/data";
 import {
   addOrUpdateStaffAction,
@@ -13,11 +14,15 @@ export default async function StaffPage() {
   return (
     <div className="page-stack">
       <Panel title="Add or Update Staff Member">
-        <form action={addOrUpdateStaffAction} style={{ display: "grid", gap: 12 }}>
+        <ActionForm
+          action={addOrUpdateStaffAction}
+          idleText="Save Staff Member"
+          pendingText="Saving..."
+          className="grid"
+        >
           <input name="discordId" placeholder="Discord ID" style={inputStyle} required />
           <input name="rank" placeholder="Rank" style={inputStyle} required />
-          <button style={buttonStyle}>Save Staff Member</button>
-        </form>
+        </ActionForm>
       </Panel>
 
       <Panel title="Staff Roster">
@@ -39,21 +44,23 @@ export default async function StaffPage() {
                 <td>{row.strikes}</td>
                 <td>{new Date(row.createdAt).toLocaleString()}</td>
                 <td>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <form action={addStrikeAction}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
+                    <ActionForm action={addStrikeAction} idleText="+1 Strike" pendingText="Adding...">
                       <input type="hidden" name="discordId" value={row.user.discordId || ""} />
                       <input type="hidden" name="amount" value="1" />
-                      <button style={buttonStyle}>+1 Strike</button>
-                    </form>
-                    <form action={removeStrikeAction}>
+                    </ActionForm>
+                    <ActionForm action={removeStrikeAction} idleText="-1 Strike" pendingText="Removing...">
                       <input type="hidden" name="discordId" value={row.user.discordId || ""} />
                       <input type="hidden" name="amount" value="1" />
-                      <button style={buttonStyle}>-1 Strike</button>
-                    </form>
-                    <form action={removeStaffAction}>
+                    </ActionForm>
+                    <DangerActionForm
+                      action={removeStaffAction}
+                      idleText="Remove"
+                      pendingText="Removing..."
+                      confirmMessage="Remove this staff member?"
+                    >
                       <input type="hidden" name="discordId" value={row.user.discordId || ""} />
-                      <button style={dangerButtonStyle}>Remove</button>
-                    </form>
+                    </DangerActionForm>
                   </div>
                 </td>
               </tr>
@@ -71,20 +78,4 @@ const inputStyle = {
   background: "rgba(255,255,255,0.04)",
   color: "white",
   padding: "0.9rem 1rem",
-};
-
-const buttonStyle = {
-  borderRadius: 10,
-  background: "#2563eb",
-  color: "white",
-  padding: "0.55rem 0.9rem",
-  fontWeight: 700,
-};
-
-const dangerButtonStyle = {
-  borderRadius: 10,
-  background: "#dc2626",
-  color: "white",
-  padding: "0.55rem 0.9rem",
-  fontWeight: 700,
 };
