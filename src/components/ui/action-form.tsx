@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState } from "react";
 
 type ActionState = {
   ok: boolean;
@@ -15,25 +15,19 @@ const initialState: ActionState = {
 export function ActionForm({
   action,
   children,
-  successMessage = "Saved successfully.",
   pendingText = "Working...",
   idleText = "Submit",
   className,
+  buttonVariant = "primary",
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   children: React.ReactNode;
-  successMessage?: string;
   pendingText?: string;
   idleText?: string;
   className?: string;
+  buttonVariant?: "primary" | "secondary" | "success" | "ghost";
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
-
-  useEffect(() => {
-    if (state.message) {
-      console.log(`[dashboard-action] ${state.ok ? "success" : "error"}: ${state.message}`);
-    }
-  }, [state]);
 
   return (
     <form action={formAction} className={className}>
@@ -41,14 +35,8 @@ export function ActionForm({
       <button
         type="submit"
         disabled={pending}
-        style={{
-          borderRadius: 12,
-          background: pending ? "#9ca3af" : "#f97316",
-          color: "white",
-          padding: "0.9rem 1rem",
-          fontWeight: 700,
-          opacity: pending ? 0.85 : 1,
-        }}
+        className={`button ${buttonVariant}`}
+        style={pending ? { opacity: 0.82 } : undefined}
       >
         {pending ? pendingText : idleText}
       </button>
@@ -57,16 +45,16 @@ export function ActionForm({
         <div
           style={{
             marginTop: 12,
-            borderRadius: 12,
+            borderRadius: 14,
             padding: "0.85rem 1rem",
-            background: state.ok ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
-            border: `1px solid ${state.ok ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
+            background: state.ok ? "rgba(34,197,94,0.10)" : "rgba(239,68,68,0.10)",
+            border: `1px solid ${state.ok ? "rgba(34,197,94,0.28)" : "rgba(239,68,68,0.28)"}`,
             color: state.ok ? "#86efac" : "#fca5a5",
             fontSize: 14,
-            lineHeight: 1.4,
+            lineHeight: 1.45,
           }}
         >
-          {state.message || successMessage}
+          {state.message}
         </div>
       ) : null}
     </form>
@@ -101,14 +89,8 @@ export function DangerActionForm({
       <button
         type="submit"
         disabled={pending}
-        style={{
-          borderRadius: 10,
-          background: pending ? "#9ca3af" : "#dc2626",
-          color: "white",
-          padding: "0.55rem 0.9rem",
-          fontWeight: 700,
-          opacity: pending ? 0.85 : 1,
-        }}
+        className="button danger"
+        style={pending ? { opacity: 0.82 } : undefined}
       >
         {pending ? pendingText : idleText}
       </button>
@@ -116,14 +98,14 @@ export function DangerActionForm({
       {state.message ? (
         <div
           style={{
-            marginTop: 8,
-            borderRadius: 12,
-            padding: "0.7rem 0.9rem",
-            background: state.ok ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
-            border: `1px solid ${state.ok ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
+            marginTop: 10,
+            borderRadius: 14,
+            padding: "0.75rem 0.9rem",
+            background: state.ok ? "rgba(34,197,94,0.10)" : "rgba(239,68,68,0.10)",
+            border: `1px solid ${state.ok ? "rgba(34,197,94,0.28)" : "rgba(239,68,68,0.28)"}`,
             color: state.ok ? "#86efac" : "#fca5a5",
             fontSize: 13,
-            lineHeight: 1.35,
+            lineHeight: 1.4,
           }}
         >
           {state.message}

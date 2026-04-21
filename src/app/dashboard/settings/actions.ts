@@ -30,6 +30,7 @@ export async function updateGuildConfigAction(_prevState: ActionState, formData:
 
     await callInternalApi("/api/settings/guild-config", {
       guildId,
+      guildName: null,
       modLogChannelId,
       ticketCategoryId,
       ticketLogChannelId,

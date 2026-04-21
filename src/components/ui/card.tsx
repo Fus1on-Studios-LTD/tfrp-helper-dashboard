@@ -10,25 +10,32 @@ export function Card({
   subtitle?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm backdrop-blur">
-      <div className="text-sm text-white/60">{title}</div>
-      <div className="mt-2 text-3xl font-semibold text-white">{value}</div>
-      {subtitle ? <div className="mt-2 text-sm text-white/50">{subtitle}</div> : null}
+    <div className="panel kpi-card">
+      <div className="panel-inner">
+        <div className="badge">{title}</div>
+        <div className="kpi-value">{value}</div>
+        {subtitle ? <div className="kpi-subtitle">{subtitle}</div> : null}
+      </div>
     </div>
   );
 }
 
 export function Panel({
   title,
+  subtitle,
   children,
 }: {
   title: string;
+  subtitle?: string;
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm backdrop-blur">
-      <h2 className="mb-4 text-lg font-semibold text-white">{title}</h2>
-      {children}
+    <section className="panel">
+      <div className="panel-inner">
+        <h2 className="section-title">{title}</h2>
+        {subtitle ? <div className="section-subtitle">{subtitle}</div> : null}
+        {children}
+      </div>
     </section>
   );
 }

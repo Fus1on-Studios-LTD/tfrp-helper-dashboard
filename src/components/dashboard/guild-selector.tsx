@@ -23,49 +23,47 @@ export function GuildSelector({
   selectedGuildId?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-      <div className="mb-3 text-sm font-semibold text-white">Guild Scope</div>
+    <div className="panel">
+      <div className="panel-inner">
+        <div className="badge">Guild Scope</div>
+        <div style={{ marginTop: 10 }} className="section-subtitle">
+          Choose a guild to filter operational data across the dashboard.
+        </div>
 
-      <div className="grid gap-2">
-        <Link
-          href={withGuildQuery("/dashboard", "")}
-          className={!selectedGuildId ? activeClassName : itemClassName}
-        >
-          All Guilds
-        </Link>
-
-        {guilds.map((guild) => (
+        <div className="select-card-grid">
           <Link
-            key={guild.id}
-            href={withGuildQuery("/dashboard", guild.id)}
-            className={selectedGuildId === guild.id ? activeClassName : itemClassName}
+            href={withGuildQuery("/dashboard", "")}
+            className={`select-card ${!selectedGuildId ? "active" : ""}`}
           >
-            {guild.name}
+            <div style={{ fontWeight: 700 }}>All Guilds</div>
+            <div className="section-subtitle">View cross-network activity</div>
           </Link>
-        ))}
-      </div>
 
-      <div style={{ marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.55)" }}>
-        The selected guild scope is preserved when using the page links below.
-      </div>
+          {guilds.map((guild) => (
+            <Link
+              key={guild.id}
+              href={withGuildQuery("/dashboard", guild.id)}
+              className={`select-card ${selectedGuildId === guild.id ? "active" : ""}`}
+            >
+              <div style={{ fontWeight: 700 }}>{guild.name}</div>
+              <div className="section-subtitle">{guild.id}</div>
+            </Link>
+          ))}
+        </div>
 
-      <div className="grid gap-2" style={{ marginTop: 16 }}>
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={withGuildQuery(item.href, selectedGuildId || "")}
-            className={itemClassName}
-          >
-            Open {item.label}
-          </Link>
-        ))}
+        <div className="sidebar-links" style={{ marginTop: "1rem" }}>
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={withGuildQuery(item.href, selectedGuildId || "")}
+              className="nav-link"
+            >
+              <span>Open {item.label}</span>
+              <span style={{ color: "rgba(248,250,252,0.42)" }}>→</span>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-const itemClassName =
-  "block rounded-xl border border-transparent px-3 py-2 text-sm text-white/75 transition hover:border-white/10 hover:bg-white/5 hover:text-white";
-
-const activeClassName =
-  "block rounded-xl border border-orange-400/30 bg-orange-500/10 px-3 py-2 text-sm text-white";

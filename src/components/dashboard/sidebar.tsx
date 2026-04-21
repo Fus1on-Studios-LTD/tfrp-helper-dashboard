@@ -2,33 +2,53 @@ import Link from "next/link";
 import { withGuildQuery } from "@/lib/guild-filter";
 
 const items = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/tickets", label: "Tickets" },
-  { href: "/dashboard/staff", label: "Staff" },
-  { href: "/dashboard/moderation", label: "Moderation" },
-  { href: "/dashboard/sticky", label: "Sticky" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard", label: "Overview", emoji: "📊" },
+  { href: "/dashboard/tickets", label: "Tickets", emoji: "🎫" },
+  { href: "/dashboard/staff", label: "Staff", emoji: "🧑‍💼" },
+  { href: "/dashboard/moderation", label: "Moderation", emoji: "🛡️" },
+  { href: "/dashboard/sticky", label: "Sticky", emoji: "📌" },
+  { href: "/dashboard/settings", label: "Settings", emoji: "⚙️" },
+  { href: "/dashboard/network", label: "Network", emoji: "🌐" },
 ];
 
-export function Sidebar({ selectedGuildId = "" }: { selectedGuildId?: string }) {
+export function Sidebar({
+  selectedGuildId = "",
+  currentPath = "/dashboard",
+}: {
+  selectedGuildId?: string;
+  currentPath?: string;
+}) {
   return (
-    <aside className="w-full rounded-2xl border border-white/10 bg-black/30 p-4 lg:w-72">
-      <div className="mb-6">
-        <div className="text-xs uppercase tracking-[0.2em] text-orange-300">Fus1on</div>
-        <div className="text-xl font-semibold text-white">Staff Dashboard</div>
-      </div>
+    <aside className="panel">
+      <div className="panel-inner">
+        <div className="sidebar-brand">
+          <div className="sidebar-chip">Fus1on Studios</div>
+          <div className="sidebar-title">Staff Dashboard</div>
+          <div className="section-subtitle">
+            Clean operator view for moderation, tickets, sticky systems, staff controls, and network sync.
+          </div>
+        </div>
 
-      <nav className="space-y-2">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={withGuildQuery(item.href, selectedGuildId)}
-            className="block rounded-xl border border-transparent px-3 py-2 text-sm text-white/75 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+        <nav className="sidebar-links">
+          {items.map((item) => {
+            const href = item.href === "/dashboard/network"
+              ? item.href
+              : withGuildQuery(item.href, selectedGuildId);
+            const isActive = currentPath === item.href;
+
+            return (
+              <Link
+                key={item.href}
+                href={href}
+                className={`nav-link ${isActive ? "active" : ""}`}
+              >
+                <span>{item.emoji} {item.label}</span>
+                <span style={{ color: "rgba(248,250,252,0.42)" }}>→</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
     </aside>
   );
 }
