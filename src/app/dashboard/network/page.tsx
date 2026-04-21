@@ -1,52 +1,29 @@
 import { Panel } from "@/components/ui/card";
 import { NetworkLinkPanel } from "@/components/network/network-link-panel";
+import { NetworkRuleManager } from "@/components/network/network-rule-manager";
 import { prisma } from "@/lib/prisma";
 
 export default async function NetworkPage() {
   const rules = await prisma.networkSyncRule.findMany({
-    where: { enabled: true },
-    orderBy: [{ sourceGuildId: "asc" }, { targetGuildId: "asc" }],
-    take: 100,
+    orderBy: [{ enabled: "desc" }, { sourceGuildId: "asc" }, { targetGuildId: "asc" }],
+    take: 200,
   });
 
   return (
     <div className="page-stack">
       <NetworkLinkPanel />
+      <NetworkRuleManager rules={rules} />
 
       <Panel
-        title="Active Network Sync Rules"
-        subtitle="These are the enabled role-based rules that decide whether a linked user can be auto-joined into another guild."
+        title="Sync Rule Notes"
+        subtitle="How the rule engine works with your OAuth-linked users and global role mappings."
       >
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Source Guild</th>
-                <th>Source Role</th>
-                <th>Target Guild</th>
-                <th>Global Role Key</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rules.map((rule) => (
-                <tr key={rule.id}>
-                  <td>{rule.sourceGuildId}</td>
-                  <td>{rule.sourceRoleId}</td>
-                  <td>{rule.targetGuildId}</td>
-                  <td>{rule.globalRoleKey || "—"}</td>
-                  <td>{rule.enabled ? "Enabled" : "Disabled"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={{ display: "grid", gap: 10, color: "var(--muted)", lineHeight: 1.6 }}>
+          <div>1. User links their Discord account through the OAuth flow.</div>
+          <div>2. A sync rule checks whether they have the source role in the source guild.</div>
+          <div>3. If matched, the bot joins them to the target guild using <code>guilds.join</code>.</div>
+          <div>4. If a global role key is set, the mapped target guild role is assigned after join.</div>
         </div>
-
-        {!rules.length ? (
-          <div className="empty-state">
-            No enabled network sync rules were found. Add rules in your bot database or build the rule manager next.
-          </div>
-        ) : null}
       </Panel>
     </div>
   );
