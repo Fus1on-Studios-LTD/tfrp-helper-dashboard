@@ -9,6 +9,7 @@ const items = [
   { href: "/dashboard/sticky", label: "Sticky", emoji: "📌" },
   { href: "/dashboard/settings", label: "Settings", emoji: "⚙️" },
   { href: "/dashboard/network", label: "Network", emoji: "🌐" },
+  { href: "/dashboard/roles", label: "Global Roles", emoji: "🧩" },
 ];
 
 export function Sidebar({
