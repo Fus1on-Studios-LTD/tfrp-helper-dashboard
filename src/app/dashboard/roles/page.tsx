@@ -1,6 +1,7 @@
 import { GlobalRoleMappingManager } from "@/components/roles/global-role-mapping-manager";
 import { getSelectedGuildId } from "@/lib/guild-filter";
 import { prisma } from "@/lib/prisma";
+import { getDiscordRolesForGuild } from "./role-data";
 
 export default async function RolesPage({
   searchParams,
@@ -10,7 +11,7 @@ export default async function RolesPage({
   const resolvedSearchParams = (await searchParams) || {};
   const selectedGuildId = getSelectedGuildId(resolvedSearchParams);
 
-  const [guilds, mappings] = await Promise.all([
+  const [guilds, mappings, roles] = await Promise.all([
     prisma.guild.findMany({
       orderBy: { name: "asc" },
       take: 200,
@@ -20,6 +21,7 @@ export default async function RolesPage({
       orderBy: [{ guildId: "asc" }, { key: "asc" }],
       take: 300,
     }),
+    getDiscordRolesForGuild(selectedGuildId),
   ]);
 
   return (
@@ -27,6 +29,7 @@ export default async function RolesPage({
       guilds={guilds}
       mappings={mappings}
       selectedGuildId={selectedGuildId}
+      roles={roles}
     />
   );
 }
